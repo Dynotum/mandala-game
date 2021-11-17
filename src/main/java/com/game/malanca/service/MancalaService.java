@@ -5,7 +5,6 @@ import com.game.malanca.domain.dto.responses.*;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.game.malanca.domain.dto.responses.PlayerTypeResponse.*;
 import static com.game.malanca.utils.Constants.*;
@@ -14,10 +13,7 @@ import static com.game.malanca.utils.Constants.*;
 public class MancalaService {
 
     public MancalaResponseDTO startGame(StartRequestDTO startRequestDTO) {
-
         final List<PlayerResponseDTO> responseDTOArrayList = new ArrayList<>();
-//        final PlayerTypeResponse playerType = PlayerTypeResponse.randomType();
-//        final boolean isPlayerTurnFirst = playerType.equals(FIRST);
         final boolean randomTurn = getRandomTurn();
 
         for (PlayerRequestDTO player : startRequestDTO.getPlayers()) {
@@ -45,14 +41,61 @@ public class MancalaService {
     }
 
     public MancalaResponseDTO makeMove(MoveRequestDTO moveRequestDTO) {
-
         if (!isValidMoveRequest(moveRequestDTO)) {
             System.out.println("not valid move - try again");
             return moveRequestDTOToMancalaResponseDTO(moveRequestDTO);
         }
 
-        return moveRequestDTOToMancalaResponseDTO(moveRequestDTO);
+        MancalaResponseDTO mancalaResponseDTO = moveRequestDTOToMancalaResponseDTO(moveRequestDTO);
+
+        System.out.println("result of is Ended game? = " + isEndedGame(mancalaResponseDTO));
+
+
+        // TODO after making a move we need to check whether there's an empty array (full of zeros) - that's the end of the game
+        // If that's the case we need to take the rest of the stones belong to the player who still has stones and sum them up to their bigPit
+        // we need to set flag endedGame as true in our responseDTO
+        return mancalaResponseDTO;
     }
+
+    private boolean isEndedGame(MancalaResponseDTO mancalaResponseDTO) {
+        final PlayerResponseDTO player1 = mancalaResponseDTO.getPlayers().get(0);
+        final PlayerResponseDTO player2 = mancalaResponseDTO.getPlayers().get(1);
+
+        int[] result1 = player1.getBoard().getPits();
+        int[] result2 = player2.getBoard().getPits();
+        
+        boolean p1 = true;
+        boolean p2 = true;
+        for (int number : result1) {
+            if (number != 0) {
+                p1 = false;
+                break;
+            }
+        }
+        for (int number : result2) {
+            if (number != 0) {
+                p2 = false;
+                break;
+            }
+        }
+/*        Optional<Integer> optional = Arrays.stream(result1)
+                .filter(x -> x != 0)
+                .boxed().findAny();
+
+        Optional<Integer> optional2 = Arrays.stream(result2)
+                .filter(x -> x != 0)
+                .boxed().findAny();
+
+        if (optional.isPresent()) {//Check whether optional has element you are looking for
+            Integer p = optional.get();//get it from optional
+            System.out.println("result --> " + p);
+            return false;
+        }*/
+
+
+        return p1 || p2;
+    }
+
 
     private MancalaResponseDTO moveRequestDTOToMancalaResponseDTO(MoveRequestDTO moveRequestDTO) {
         final PlayerResponseDTO playerResponseDTO = new PlayerResponseDTO(
@@ -65,18 +108,28 @@ public class MancalaService {
                 moveRequestDTO.getPlayers().get(1).getPlayerType(),
                 !moveRequestDTO.getPlayers().get(1).isPlayerTurn(),
                 moveRequestDTO.getPlayers().get(1).getBoard());
-//        randomPlayerBoard(moveRequestDTO.getPlayers().get(1).getBoard().getPits()));
 
         return new MancalaResponseDTO(List.of(playerResponseDTO, playerResponseDTO2), false);
     }
 
+    /**
+     * first
+     * 0 1 2 3 4 5
+     * <p>
+     * 6 6 6 6 6 6
+     * 6 6 6 6 6 6
+     * <p>
+     * 6 7 8 9 0 1
+     * second
+     *
+     * @return success whether is allowed to make a move. Otherwise, return false
+     */
     private boolean isValidMoveRequest(MoveRequestDTO moveRequestDTO) {
-
         final int pit = moveRequestDTO.getPit();
 
-        final PlayerResponseDTO currentTurnPlayer = moveRequestDTO.
+        final PlayerMoveRequestDTO currentTurnPlayer = moveRequestDTO.
                 getPlayers().stream().
-                filter(PlayerResponseDTO::isPlayerTurn).
+                filter(PlayerMoveRequestDTO::isPlayerTurn).
                 findAny().
                 orElse(null); //TODO
 
@@ -88,23 +141,9 @@ public class MancalaService {
         if (currentTurnPlayer.getPlayerType().equals(SECOND)) {
             return pit >= 6 && pit <= 11;
         }
-
-        /*
-         *       first
-         *       0 1 2 3 4 5
-         *
-         *       6 6 6 6 6 6
-         *       6 6 6 6 6 6
-         *
-         *       6 7 8 9 0 1
-         *       second
-         *
-         *
-         * */
-
         return false;
-
     }
+
 
     private BoardResponseDTO randomPlayerBoard(int[] board) {
         Arrays.fill(board, RANDOM.nextInt(NUMBER_OF_STONES));
