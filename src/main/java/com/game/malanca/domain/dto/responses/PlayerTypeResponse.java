@@ -1,13 +1,11 @@
 package com.game.malanca.domain.dto.responses;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static com.game.malanca.utils.Constants.RANDOM;
 
 public enum PlayerTypeResponse {
-    FIRST, SECOND;
+    PLAYER_ONE, PLAYER_TWO;
 
     private static final List<PlayerTypeResponse> VALUES = List.of(values());
     private static final int SIZE = VALUES.size();
@@ -17,6 +15,6 @@ public enum PlayerTypeResponse {
     }
 
     public static PlayerTypeResponse missingType(PlayerTypeResponse playerType) {
-        return playerType.equals(FIRST) ? SECOND : FIRST;
+        return playerType.equals(PLAYER_ONE) ? PLAYER_TWO : PLAYER_ONE;
     }
 }

@@ -2,6 +2,8 @@ package com.game.malanca.service;
 
 import com.game.malanca.domain.dto.requests.*;
 import com.game.malanca.domain.dto.responses.*;
+import com.game.malanca.mapper.MancalaMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -12,21 +14,16 @@ import static com.game.malanca.utils.Constants.*;
 @Service
 public class MancalaService {
 
+    private MancalaMapper mancalaMapper;
+
+    @Autowired
+    public MancalaService(MancalaMapper mancalaMapper) {
+        this.mancalaMapper = mancalaMapper;
+    }
+
     public MancalaResponseDTO startGame(StartRequestDTO startRequestDTO) {
-        final List<PlayerResponseDTO> responseDTOArrayList = new ArrayList<>();
-        final boolean randomTurn = getRandomTurn();
-
-        for (PlayerRequestDTO player : startRequestDTO.getPlayers()) {
-            final PlayerResponseDTO playerResponseDTO;
-            if (responseDTOArrayList.isEmpty()) {
-                playerResponseDTO = new PlayerResponseDTO(player.getName(), FIRST, randomTurn, initPlayerBoard());
-            } else {
-                playerResponseDTO = new PlayerResponseDTO(player.getName(), SECOND, !randomTurn, initPlayerBoard());
-            }
-            responseDTOArrayList.add(playerResponseDTO);
-        }
-
-        return new MancalaResponseDTO(responseDTOArrayList, false);
+        // TODO check empty strings -> if error throw exception otherwise continue
+        return mancalaMapper.startRequestDTOToMancalaResponseDTO(startRequestDTO, getRandomTurn(), initPlayerBoard());
     }
 
     private boolean getRandomTurn() {
@@ -40,13 +37,19 @@ public class MancalaService {
         return new BoardResponseDTO(pit, ZERO_BIG_PIT);
     }
 
+    /**
+     *
+     * @param moveRequestDTO
+     * @return
+     */
     public MancalaResponseDTO makeMove(MoveRequestDTO moveRequestDTO) {
+
         if (!isValidMoveRequest(moveRequestDTO)) {
             System.out.println("not valid move - try again");
-            return moveRequestDTOToMancalaResponseDTO(moveRequestDTO);
+            throw new IllegalArgumentException("Invalid move");
         }
 
-        MancalaResponseDTO mancalaResponseDTO = moveRequestDTOToMancalaResponseDTO(moveRequestDTO);
+        MancalaResponseDTO mancalaResponseDTO = mancalaMapper.moveRequestDTOToMancalaResponseDTO(moveRequestDTO);
 
         System.out.println("result of is Ended game? = " + isEndedGame(mancalaResponseDTO));
 
@@ -63,7 +66,7 @@ public class MancalaService {
 
         int[] result1 = player1.getBoard().getPits();
         int[] result2 = player2.getBoard().getPits();
-        
+
         boolean p1 = true;
         boolean p2 = true;
         for (int number : result1) {
@@ -78,39 +81,12 @@ public class MancalaService {
                 break;
             }
         }
-/*        Optional<Integer> optional = Arrays.stream(result1)
-                .filter(x -> x != 0)
-                .boxed().findAny();
-
-        Optional<Integer> optional2 = Arrays.stream(result2)
-                .filter(x -> x != 0)
-                .boxed().findAny();
-
-        if (optional.isPresent()) {//Check whether optional has element you are looking for
-            Integer p = optional.get();//get it from optional
-            System.out.println("result --> " + p);
-            return false;
-        }*/
-
 
         return p1 || p2;
     }
 
 
-    private MancalaResponseDTO moveRequestDTOToMancalaResponseDTO(MoveRequestDTO moveRequestDTO) {
-        final PlayerResponseDTO playerResponseDTO = new PlayerResponseDTO(
-                moveRequestDTO.getPlayers().get(0).getName(),
-                moveRequestDTO.getPlayers().get(0).getPlayerType(),
-                !moveRequestDTO.getPlayers().get(0).isPlayerTurn(), moveRequestDTO.getPlayers().get(0).getBoard());
 
-        final PlayerResponseDTO playerResponseDTO2 = new PlayerResponseDTO(
-                moveRequestDTO.getPlayers().get(1).getName(),
-                moveRequestDTO.getPlayers().get(1).getPlayerType(),
-                !moveRequestDTO.getPlayers().get(1).isPlayerTurn(),
-                moveRequestDTO.getPlayers().get(1).getBoard());
-
-        return new MancalaResponseDTO(List.of(playerResponseDTO, playerResponseDTO2), false);
-    }
 
     /**
      * first
@@ -127,23 +103,24 @@ public class MancalaService {
     private boolean isValidMoveRequest(MoveRequestDTO moveRequestDTO) {
         final int pit = moveRequestDTO.getPit();
 
-        final PlayerMoveRequestDTO currentTurnPlayer = moveRequestDTO.
+        final Optional<PlayerMoveRequestDTO> currentTurnPlayer = moveRequestDTO.
                 getPlayers().stream().
                 filter(PlayerMoveRequestDTO::isPlayerTurn).
-                findAny().
-                orElse(null); //TODO
+                findAny();
 
+        if (currentTurnPlayer.isPresent()) {
+            final PlayerTypeResponse currentPlayer = currentTurnPlayer.get().getPlayerType();
+            if (PLAYER_ONE.equals(currentPlayer)) {
+                return pit >= 0 && pit <= 5;
+            }
 
-        if (currentTurnPlayer.getPlayerType().equals(FIRST)) {
-            return pit >= 0 && pit <= 5;
+            if (PLAYER_TWO.equals(currentPlayer)) {
+                return pit >= 6 && pit <= 11;
+            }
         }
 
-        if (currentTurnPlayer.getPlayerType().equals(SECOND)) {
-            return pit >= 6 && pit <= 11;
-        }
         return false;
     }
-
 
     private BoardResponseDTO randomPlayerBoard(int[] board) {
         Arrays.fill(board, RANDOM.nextInt(NUMBER_OF_STONES));
