@@ -5,13 +5,12 @@ import lombok.*;
 
 import java.util.List;
 
-
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class StartRequestDTO {
     private List<PlayerRequestDTO> players;
 }

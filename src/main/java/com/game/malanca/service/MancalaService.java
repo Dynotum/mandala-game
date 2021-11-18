@@ -3,14 +3,17 @@ package com.game.malanca.service;
 import com.game.malanca.domain.dto.requests.*;
 import com.game.malanca.domain.dto.responses.*;
 import com.game.malanca.mapper.MancalaMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static com.game.malanca.domain.dto.responses.PlayerTypeResponse.*;
 import static com.game.malanca.utils.Constants.*;
 
+@Slf4j
 @Service
 public class MancalaService {
 
@@ -38,26 +41,148 @@ public class MancalaService {
     }
 
     /**
-     *
      * @param moveRequestDTO
      * @return
      */
     public MancalaResponseDTO makeMove(MoveRequestDTO moveRequestDTO) {
 
         if (!isValidMoveRequest(moveRequestDTO)) {
-            System.out.println("not valid move - try again");
+            log.debug("Not a valid move");
             throw new IllegalArgumentException("Invalid move");
         }
 
-        MancalaResponseDTO mancalaResponseDTO = mancalaMapper.moveRequestDTOToMancalaResponseDTO(moveRequestDTO);
-
-        System.out.println("result of is Ended game? = " + isEndedGame(mancalaResponseDTO));
+        doMove(getFullBoard(moveRequestDTO), moveRequestDTO);
 
 
         // TODO after making a move we need to check whether there's an empty array (full of zeros) - that's the end of the game
         // If that's the case we need to take the rest of the stones belong to the player who still has stones and sum them up to their bigPit
         // we need to set flag endedGame as true in our responseDTO
-        return mancalaResponseDTO;
+        return mancalaMapper.moveRequestDTOToMancalaResponseDTO(moveRequestDTO);
+    }
+
+    private PlayerMoveRequestDTO getPlayerTurn(MoveRequestDTO moveRequestDTO) {
+
+        final Optional<PlayerMoveRequestDTO> currentTurnPlayer = moveRequestDTO.
+                getPlayers().stream().
+                filter(PlayerMoveRequestDTO::isPlayerTurn).
+                findAny();
+
+        return currentTurnPlayer.orElseThrow(() -> new IllegalArgumentException("Invalid move"));
+    }
+
+    private void doMove(int[] board, MoveRequestDTO moveRequestDTO) {
+        final PlayerMoveRequestDTO currentPlayerTurn = getPlayerTurn(moveRequestDTO);
+
+        int pickedPit = moveRequestDTO.getPit();
+        int stones = board[pickedPit];
+        int bigPitCurrentPlayerTurn = currentPlayerTurn.getBoard().getBigPit();
+
+        if (stones == 0) {
+            throw new IllegalArgumentException("There is an empty pit");
+        }
+
+        // Take stones
+        board[pickedPit] = 0; //
+
+        while (stones > 0) {
+            pickedPit++;
+            if (pickedPit == LIMIT_BOARD_PLAYER_ONE && PLAYER_ONE.equals(currentPlayerTurn.getPlayerType())) {
+                bigPitCurrentPlayerTurn++;
+                System.out.print("bp1: " + bigPitCurrentPlayerTurn + " ");
+                System.out.print(Arrays.toString(board) + " bp2: ");
+                System.out.println();
+                stones--;
+
+                if (stones == 0) {
+                    // TODO player has an extra turn -> DTO -> isMyTurn: true
+                    boolean x = isEndedGame(board, currentPlayerTurn.getPlayerType());
+                    System.out.println(x ? "is ended game " : "PLAYER ONE HAS AN EXTRA TURN");
+                }
+
+                if (stones > 0) {
+                    board[pickedPit]++;
+                    System.out.print("bp1: " + bigPitCurrentPlayerTurn + " ");
+                    System.out.print(Arrays.toString(board) + " bp2: ");
+                    System.out.println();
+                    stones--;
+                }
+                continue;
+            }
+
+            if (pickedPit == board.length && PLAYER_TWO.equals(currentPlayerTurn.getPlayerType())) {
+                bigPitCurrentPlayerTurn++;
+                System.out.print("bp1: ");
+                System.out.print(Arrays.toString(board) + " bp2: " + bigPitCurrentPlayerTurn);
+                System.out.println();
+                stones--;
+
+                if (stones == 0) {
+                    // TODO player has an extra turn -> DTO -> isMyTurn: true
+                    boolean x = isEndedGame(board, currentPlayerTurn.getPlayerType());
+                    System.out.println(x ? "is ended game " : "PLAYER 2 HAS AN EXTRA TURN");
+                }
+
+                if (stones > 0) {
+                    pickedPit = 0;
+                    board[pickedPit]++;
+                    System.out.print("bp1: ");
+                    System.out.print(Arrays.toString(board) + " bp2: " + bigPitCurrentPlayerTurn);
+                    System.out.println();
+                    stones--;
+                }
+                continue;
+            } else if (pickedPit == board.length) {
+                pickedPit = 0;
+            }
+
+            board[pickedPit]++;
+            System.out.print("bp1: ");
+            System.out.print(Arrays.toString(board) + " bp2: " + bigPitCurrentPlayerTurn);
+            System.out.println();
+            stones--;
+        }
+        // board[pickedPit] == 1 -> it was empty -> then picked enemies stones up -> sum them up to my bigPit
+
+    }
+
+    /*
+     *
+     *
+     *           1 0 9
+     *        7  1 0 6 6 6 0
+     *
+     *           8 6 6 6 0 0  7
+     *           0 1 2
+     *
+     *
+     *  5 * 2 = 10 - 1 // todo
+     *
+     *
+     *
+     *
+     *      *      5 * 2 = 10
+     *
+     *   0 - 11
+     *   1 - 10
+     *        1  0 6 6 6 6 6
+     *
+     *           7 7 7 7 7 6  0
+    *
+    *
+    * */
+
+    private int[] getFullBoard(MoveRequestDTO moveRequestDTO) {
+        return moveRequestDTO.getPlayers().stream()
+                .map(PlayerMoveRequestDTO::getBoard)
+                .map(BoardResponseDTO::getPits)
+                .flatMapToInt(IntStream::of).toArray();
+    }
+
+    private static boolean isEndedGame(int[] board, PlayerTypeResponse playerType) {
+        if (playerType.equals(PlayerTypeResponse.PLAYER_ONE))
+            return IntStream.range(START_BOARD_PLAYER_ONE, LIMIT_BOARD_PLAYER_ONE).allMatch(i -> board[i] == EMPTY_PIT);
+
+        return IntStream.range(START_BOARD_PLAYER_TWO, LIMIT_BOARD_PLAYER_TWO).allMatch(i -> board[i] == EMPTY_PIT);
     }
 
     private boolean isEndedGame(MancalaResponseDTO mancalaResponseDTO) {
@@ -86,8 +211,6 @@ public class MancalaService {
     }
 
 
-
-
     /**
      * first
      * 0 1 2 3 4 5
@@ -101,30 +224,19 @@ public class MancalaService {
      * @return success whether is allowed to make a move. Otherwise, return false
      */
     private boolean isValidMoveRequest(MoveRequestDTO moveRequestDTO) {
-        final int pit = moveRequestDTO.getPit();
+        final int pickedPit = moveRequestDTO.getPit();
+        final PlayerMoveRequestDTO currentPlayerTurn = getPlayerTurn(moveRequestDTO);
 
-        final Optional<PlayerMoveRequestDTO> currentTurnPlayer = moveRequestDTO.
-                getPlayers().stream().
-                filter(PlayerMoveRequestDTO::isPlayerTurn).
-                findAny();
+        final PlayerTypeResponse currentPlayer = currentPlayerTurn.getPlayerType();
+        if (PLAYER_ONE.equals(currentPlayer)) {
+            return pickedPit >= 0 && pickedPit <= 5;
+        }
 
-        if (currentTurnPlayer.isPresent()) {
-            final PlayerTypeResponse currentPlayer = currentTurnPlayer.get().getPlayerType();
-            if (PLAYER_ONE.equals(currentPlayer)) {
-                return pit >= 0 && pit <= 5;
-            }
-
-            if (PLAYER_TWO.equals(currentPlayer)) {
-                return pit >= 6 && pit <= 11;
-            }
+        if (PLAYER_TWO.equals(currentPlayer)) {
+            return pickedPit >= 6 && pickedPit <= 11;
         }
 
         return false;
-    }
-
-    private BoardResponseDTO randomPlayerBoard(int[] board) {
-        Arrays.fill(board, RANDOM.nextInt(NUMBER_OF_STONES));
-        return new BoardResponseDTO(board, RANDOM.nextInt(20));
     }
 
     public EndGameResponseDTO endGame(EndGameRequestDTO endGameRequestDTO) {
@@ -149,3 +261,12 @@ public class MancalaService {
         return new EndGameResponseDTO(isTie, List.of(playerEndGameResponseDTO1, playerEndGameResponseDTO2));
     }
 }
+
+/*
+* int[] arr = new int[] {15, 1, 2, 3, 7, 9, 10};
+int startIndex = 1;
+int endIndex = 4;
+int sum = Arrays.stream(arr, startIndex, endIndex)
+         .sum();
+System.out.println(sum);
+* */
