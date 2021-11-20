@@ -7,10 +7,12 @@ import com.game.malanca.domain.dto.requests.StartRequestDTO;
 import com.game.malanca.domain.dto.responses.BoardResponseDTO;
 import com.game.malanca.domain.dto.responses.MancalaResponseDTO;
 import com.game.malanca.domain.dto.responses.PlayerResponseDTO;
+import com.game.malanca.domain.dto.responses.PlayerTypeResponse;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.game.malanca.domain.dto.responses.PlayerTypeResponse.PLAYER_ONE;
 import static com.game.malanca.domain.dto.responses.PlayerTypeResponse.PLAYER_TWO;
@@ -35,27 +37,16 @@ public class MancalaMapper {
                 .build();
     }
 
-    public MancalaResponseDTO moveRequestDTOToMancalaResponseDTO(MoveRequestDTO moveRequestDTO) {
-        final PlayerResponseDTO playerResponseDTO = new PlayerResponseDTO(
-                moveRequestDTO.getPlayers().get(0).getName(),
-                moveRequestDTO.getPlayers().get(0).getPlayerType(),
-                !moveRequestDTO.getPlayers().get(0).isPlayerTurn(), moveRequestDTO.getPlayers().get(0).getBoard());
+    public MancalaResponseDTO moveRequestDTOToMancalaResponseDTO(MoveRequestDTO moveRequestDTO, boolean isEndedGame) {
+        final List<PlayerResponseDTO> playerResponseDtos = moveRequestDTO.getPlayers().stream()
+                .map(player -> PlayerResponseDTO.builder()
+                        .playerType(player.getPlayerType())
+                        .isPlayerTurn(player.isPlayerTurn())
+                        .name(player.getName())
+                        .board(player.getBoard())
+                        .build())
+                .collect(Collectors.toList());
 
-        final PlayerResponseDTO playerResponseDTO2 = new PlayerResponseDTO(
-                moveRequestDTO.getPlayers().get(1).getName(),
-                moveRequestDTO.getPlayers().get(1).getPlayerType(),
-                !moveRequestDTO.getPlayers().get(1).isPlayerTurn(),
-                moveRequestDTO.getPlayers().get(1).getBoard());
-
-        return new MancalaResponseDTO(List.of(playerResponseDTO, playerResponseDTO2), false);
+        return new MancalaResponseDTO(playerResponseDtos, isEndedGame);
     }
 }
-
-/*        List<PlayerResponseDTO> playerResponseDtos = startRequestDTO.getPlayers().stream()
-                .map(player -> PlayerResponseDTO.builder()
-                        .playerType(PlayerTypeResponse.PLAYER_ONE)
-                        .isPlayerTurn(turn)
-                        .name(player.getName())
-                        .board(boardResponseDTO)
-                        .build())
-                .collect(Collectors.toList());*/

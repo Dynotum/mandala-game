@@ -4,6 +4,7 @@ import com.game.malanca.domain.dto.responses.BoardResponseDTO;
 import com.game.malanca.domain.dto.responses.PlayerTypeResponse;
 import lombok.*;
 
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor

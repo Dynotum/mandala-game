@@ -2,7 +2,7 @@ package com.game.malanca.domain.dto.responses;
 
 import java.util.List;
 
-import static com.game.malanca.utils.Constants.RANDOM;
+import static com.game.malanca.utils.Constants.*;
 
 public enum PlayerTypeResponse {
     PLAYER_ONE(0), PLAYER_TWO(1);
@@ -19,7 +19,15 @@ public enum PlayerTypeResponse {
         return VALUES.get(RANDOM.nextInt(SIZE));
     }
 
-    public static PlayerTypeResponse missingType(PlayerTypeResponse playerType) {
+    public static PlayerTypeResponse oppositeType(PlayerTypeResponse playerType) {
         return playerType.equals(PLAYER_ONE) ? PLAYER_TWO : PLAYER_ONE;
+    }
+
+    public static int getStartBoardPlayerType(PlayerTypeResponse playerType) {
+        return PLAYER_ONE.equals(playerType) ? START_BOARD_PLAYER_ONE : START_BOARD_PLAYER_TWO;
+    }
+
+    public static int getLimitBoardPlayerType(PlayerTypeResponse playerType) {
+        return PLAYER_ONE.equals(playerType) ? LIMIT_BOARD_PLAYER_ONE : LIMIT_BOARD_PLAYER_TWO;
     }
 }
