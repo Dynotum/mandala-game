@@ -13,10 +13,3 @@ public class BoardResponseDTO {
     private int[] pits;
     private int bigPit;
 }
-
-/*
-  "board": {
-      "pits": [6,6,6,6,6,6],
-      "bigPit": 0
-  }
-*/

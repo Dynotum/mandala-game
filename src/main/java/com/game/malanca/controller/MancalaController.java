@@ -44,7 +44,7 @@ public class MancalaController {
 
     @PostMapping(path = "/end", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<EndGameResponseDTO> endGame(@RequestBody EndGameRequestDTO endGameRequestDTO) {
-        log.info("end game!");
+        log.info("End of game!");
         return ResponseEntity.ok(mancalaService.endGame(endGameRequestDTO));
     }
 }

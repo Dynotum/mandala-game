@@ -39,23 +39,16 @@ public class MancalaService {
         return new BoardResponseDTO(pit, ZERO_BIG_PIT);
     }
 
-    /**
-     * @param moveRequestDTO
-     * @return
-     */
     public MancalaResponseDTO makeMove(MoveRequestDTO moveRequestDTO) {
-
         if (!isValidMoveRequest(moveRequestDTO)) {
             log.debug("Not a valid move");
             throw new IllegalArgumentException("Invalid move");
         }
 
-        int[] fullBoard = getFullBoard(moveRequestDTO);
+        final int[] fullBoard = getFullBoard(moveRequestDTO);
+        doMove(fullBoard, moveRequestDTO);
 
-        moveRequestDTO = doMove(fullBoard, moveRequestDTO);
-
-        boolean isEndedGame = boardPlayerAllMatchZero(moveRequestDTO);
-
+        final boolean isEndedGame = boardPlayerAllMatchZero(moveRequestDTO);
         if (isEndedGame) {
             isEndedGame(moveRequestDTO);
         }
@@ -63,7 +56,7 @@ public class MancalaService {
         return mancalaMapper.moveRequestDTOToMancalaResponseDTO(moveRequestDTO, isEndedGame);
     }
 
-    private MoveRequestDTO isEndedGame(MoveRequestDTO moveRequestDTO) {
+    private void isEndedGame(MoveRequestDTO moveRequestDTO) {
         final PlayerMoveRequestDTO currentPlayer = getCurrentPlayerTurn(moveRequestDTO);
         final PlayerMoveRequestDTO oppositePlayer = moveRequestDTO.getPlayers()
                 .get(oppositeType(
@@ -71,7 +64,6 @@ public class MancalaService {
                         .playerTypeValue);
 
         final int newBigPit;
-
         if (boardPlayerAllMatchZero(currentPlayer)) {
             newBigPit = oppositePlayer.getBoard().getBigPit() + getSumAllStones(oppositePlayer.getBoard().getPits());
             oppositePlayer.getBoard().setBigPit(newBigPit);
@@ -82,13 +74,11 @@ public class MancalaService {
 
         moveRequestDTO.setPlayers(List.of(currentPlayer, oppositePlayer));
         moveRequestDTO.getPlayers().forEach(turn -> turn.setPlayerTurn(false));
-        return moveRequestDTO;
     }
 
     private int getSumAllStones(int[] pits) {
         return IntStream.of(pits).sum();
     }
-
 
     private PlayerMoveRequestDTO getCurrentPlayerTurn(MoveRequestDTO moveRequestDTO) {
         return moveRequestDTO.
@@ -97,71 +87,13 @@ public class MancalaService {
                 findAny().orElseThrow(() -> new IllegalArgumentException("Invalid move"));
     }
 
-    /*    private void doMove(int[] board, MoveRequestDTO moveRequestDTO) {
-            final PlayerMoveRequestDTO currentPlayerTurn = getCurrentPlayerTurn(moveRequestDTO);
-
-            int pickedPit = moveRequestDTO.getPit();
-            int stones = board[pickedPit];
-            int bigPitCurrentPlayerTurn = currentPlayerTurn.getBoard().getBigPit();
-
-            if (stones == 0) {
-                throw new IllegalArgumentException("There is an empty pit");
-            }
-
-            // Take stones
-            board[pickedPit] = 0; //
-
-            while (stones > 0) {
-                pickedPit++;
-                if (pickedPit == LIMIT_BOARD_PLAYER_ONE && PLAYER_ONE.equals(currentPlayerTurn.getPlayerType())) {
-                    bigPitCurrentPlayerTurn++;
-                    stones--;
-
-                    if (stones == 0) {
-                        boolean x = isEndedGame(board, currentPlayerTurn.getPlayerType());
-                        System.out.println(x ? "is ended game " : "PLAYER " + currentPlayerTurn.getPlayerType() + " HAS AN EXTRA TURN");
-                    }
-
-                    if (stones > 0) {
-                        board[pickedPit]++;
-                        stones--;
-                    }
-                    continue;
-                }
-
-                if (pickedPit == board.length && PLAYER_TWO.equals(currentPlayerTurn.getPlayerType())) {
-                    bigPitCurrentPlayerTurn++;
-                    stones--;
-
-                    if (stones == 0) {
-                        boolean x = isEndedGame(board, currentPlayerTurn.getPlayerType());
-                        System.out.println(x ? "is ended game " : "PLAYER " + currentPlayerTurn.getPlayerType() + " HAS AN EXTRA TURN");
-                    }
-
-                    if (stones > 0) {
-                        pickedPit = 0;
-                        board[pickedPit]++;
-                        stones--;
-                    }
-                    continue;
-                }
-
-                if (pickedPit == board.length) {
-                    pickedPit = 0;
-                }
-
-                board[pickedPit]++;
-                stones--;
-            }
-        }*/
-    private MoveRequestDTO doMove(int[] board, MoveRequestDTO moveRequestDTO) {
-
+    private void doMove(int[] board, MoveRequestDTO moveRequestDTO) {
         final PlayerMoveRequestDTO currentPlayerTurn = getCurrentPlayerTurn(moveRequestDTO);
 
         int pickedPit = moveRequestDTO.getPit();
         int stones = board[pickedPit];
         int bigPitCurrentPlayer = currentPlayerTurn.getBoard().getBigPit();
-        boolean isCurrentPlayerTurn = currentPlayerTurn.isPlayerTurn();
+        boolean isCurrentPlayerTurn = false;
 
         if (stones == 0) {
             throw new IllegalArgumentException("There is an empty pit");
@@ -173,7 +105,7 @@ public class MancalaService {
         System.out.println("######################");
 
         // Take stones
-        board[pickedPit] = 0; //
+        board[pickedPit] = 0;
 
         while (stones > 0) {
             pickedPit++;
@@ -206,44 +138,50 @@ public class MancalaService {
         System.out.print(Arrays.toString(board));
         System.out.println();
 
+        if (board[pickedPit] == 1) {
+            System.out.println("steal opponent's stones! -> " + getStolenStones(board, pickedPit));
+            bigPitCurrentPlayer += getStolenStones(board, pickedPit);
+            System.out.println("total bigPit -> " + bigPitCurrentPlayer);
+            getFullBoardAfterStolen(board, pickedPit);
+        }
 
-        // last movement
-
-
-        // board[pickedPit] == 1 -> it was empty -> then picked enemies stones up -> sum them up to my bigPit
-        if (board[pickedPit] == 1)
-            System.out.println("get opponent stones!");
-        // bigPit current player
-
-        return updateMove(moveRequestDTO, board, bigPitCurrentPlayer, isCurrentPlayerTurn);
-
+        updateMove(moveRequestDTO, board, bigPitCurrentPlayer, isCurrentPlayerTurn);
     }
 
-    private MoveRequestDTO updateMove(MoveRequestDTO moveRequestDTO, int[] board, int bigPitCurrentPlayer, boolean isCurrentPlayerTurn) {
+    private int[] getFullBoardAfterStolen(int[] board, int pickedPit) {
+        board[pickedPit] = 0;
+        board[Math.abs(pickedPit - (LIMIT_BOARD_PLAYER_TWO - 1))] = 0;
+        return board;
+    }
 
+    private int getStolenStones(int[] board, int pickedPit) {
+        return board[pickedPit] + board[Math.abs(pickedPit - (LIMIT_BOARD_PLAYER_TWO - 1))];
+    }
+
+    private void updateMove(MoveRequestDTO moveRequestDTO, int[] board, int bigPitCurrentPlayer, boolean isCurrentPlayerTurn) {
         final PlayerMoveRequestDTO currentPlayerTurn = getCurrentPlayerTurn(moveRequestDTO);
-
-        final PlayerMoveRequestDTO currentPlayer = moveRequestDTO.getPlayers().get(currentPlayerTurn.getPlayerType().playerTypeValue);
         final PlayerMoveRequestDTO oppositePlayer = moveRequestDTO.getPlayers().get(oppositeType(currentPlayerTurn.getPlayerType()).playerTypeValue);
 
         // update current bigPit player
-        currentPlayer.getBoard().setBigPit(bigPitCurrentPlayer);
+        currentPlayerTurn.getBoard().setBigPit(bigPitCurrentPlayer);
 
         // update current player board
-        currentPlayer.getBoard().setPits(getPlayerBoard(currentPlayerTurn.getPlayerType(), board));
+        currentPlayerTurn.getBoard().setPits(getPlayerBoard(currentPlayerTurn.getPlayerType(), board));
 
         // update opposite player board
         oppositePlayer.getBoard().setPits(getPlayerBoard(oppositePlayer.getPlayerType(), board));
 
         // update current player turn
-        currentPlayer.setPlayerTurn(isCurrentPlayerTurn);
-        // TODO check draw/won
+        currentPlayerTurn.setPlayerTurn(isCurrentPlayerTurn);
+
         // update opposite player turn
         oppositePlayer.setPlayerTurn(!isCurrentPlayerTurn);
 
-        moveRequestDTO.setPlayers(List.of(currentPlayer, oppositePlayer));
+        moveRequestDTO.setPlayers(
+                PLAYER_ONE.equals(currentPlayerTurn.getPlayerType()) ?
+                        List.of(currentPlayerTurn, oppositePlayer) :
+                        List.of(oppositePlayer, currentPlayerTurn));
 
-        return moveRequestDTO;
     }
 
     private int[] getFullBoard(MoveRequestDTO moveRequestDTO) {
@@ -261,7 +199,6 @@ public class MancalaService {
     }
 
     private static boolean boardPlayerAllMatchZero(MoveRequestDTO moveRequestDTO) {
-
         return moveRequestDTO.getPlayers().stream()
                 .map(PlayerMoveRequestDTO::getBoard)
                 .map(BoardResponseDTO::getPits)
