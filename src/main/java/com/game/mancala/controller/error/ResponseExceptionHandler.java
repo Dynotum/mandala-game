@@ -9,13 +9,15 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.io.IOException;
 import java.time.Instant;
 import java.util.stream.Collectors;
 
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @ControllerAdvice
 public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
@@ -51,7 +53,7 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(ex, BAD_REQUEST, request);
     }
 
-    @ExceptionHandler({IOException.class, NumberFormatException.class})
+    @ExceptionHandler({IOException.class, NumberFormatException.class, NullPointerException.class, ResponseStatusException.class})
     protected ResponseEntity<Object> handleInternalServerErrorException(
             RuntimeException ex, WebRequest request) {
         return handleExceptionInternal(ex, INTERNAL_SERVER_ERROR, request);

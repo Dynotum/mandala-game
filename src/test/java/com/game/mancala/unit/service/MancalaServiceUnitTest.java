@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 import static com.game.mancala.domain.dto.responses.PlayerTypeResponse.PLAYER_ONE;
 import static com.game.mancala.domain.dto.responses.PlayerTypeResponse.PLAYER_TWO;
@@ -98,9 +99,19 @@ public class MancalaServiceUnitTest {
         method.setAccessible(true);
 
         final MoveRequestDTO moveRequestDTO = getInstance().moveRequestDTO;
+        moveRequestDTO.getPlayers().get(PLAYER_ONE.playerTypeValue)
+                .setBoard(BoardResponseDTO.builder()
+                        .pits(PLAYER_ONE_BOARD_RANDOM_STONES).build());
+
+        moveRequestDTO.getPlayers().get(PLAYER_TWO.playerTypeValue)
+                .setBoard(BoardResponseDTO.builder()
+                .pits(PLAYER_TWO_BOARD_RANDOM_STONES).build());
+
         final int[] expectedBoard = (int[]) method.invoke(service, moveRequestDTO);
 
-        assertArrayEquals(expectedBoard, FULL_BOARD);
+        System.out.println(Arrays.toString(expectedBoard));
+        System.out.println(Arrays.toString(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}));
+        assertArrayEquals(FULL_BOARD_RANDOM_STONES, expectedBoard);
     }
 
 
