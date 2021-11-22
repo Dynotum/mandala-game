@@ -30,8 +30,8 @@ public class MancalaService {
 
     public MancalaResponseDTO makeMove(MoveRequestDTO moveRequestDTO) {
         if (!isValidMoveRequest(moveRequestDTO)) {
-            log.debug("Not a valid move");
-            throw new IllegalArgumentException("Invalid move");
+            log.debug("Invalid move for player " + getCurrentPlayerTurn(moveRequestDTO).getName());
+            throw new IllegalArgumentException("Invalid move for player " + getCurrentPlayerTurn(moveRequestDTO).getName());
         }
 
         final int[] fullBoard = getFullBoard(moveRequestDTO);

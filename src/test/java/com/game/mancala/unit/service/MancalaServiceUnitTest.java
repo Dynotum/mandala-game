@@ -167,7 +167,7 @@ public class MancalaServiceUnitTest {
         moveRequestDTO.getPlayers().get(PLAYER_TWO.playerTypeValue).setPlayerTurn(false);
 
         // reflection layer wraps any underlying exception
-        final Exception exception = assertThrows(InvocationTargetException.class, () ->  method.invoke(service, moveRequestDTO),"There is not current player!");
+        final Exception exception = assertThrows(InvocationTargetException.class, () -> method.invoke(service, moveRequestDTO), "There is not current player!");
 
         assertEquals(IllegalArgumentException.class, exception.getCause().getClass());
     }
@@ -275,27 +275,57 @@ public class MancalaServiceUnitTest {
 
     @Test
     public void isValidMoveRequestPlayerOne() throws Exception {
-        final Method method = MancalaService.class.getDeclaredMethod("boardPlayerIsFullZeros", PlayerMoveRequestDTO.class);
+        final Method method = MancalaService.class.getDeclaredMethod("isValidMoveRequest", MoveRequestDTO.class);
         method.setAccessible(true);
 
         final MoveRequestDTO moveRequestDTO = getInstance().moveRequestDTO;
-        final boolean isBoardFullZeros = (boolean) method.invoke(service, moveRequestDTO.getPlayers().get(PLAYER_TWO.playerTypeValue));
+        moveRequestDTO.getPlayers().get(PLAYER_ONE.playerTypeValue).setPlayerTurn(true);
+        moveRequestDTO.getPlayers().get(PLAYER_TWO.playerTypeValue).setPlayerTurn(false);
+        moveRequestDTO.setPit(1);
+
+        final boolean isBoardFullZeros = (boolean) method.invoke(service, moveRequestDTO);
+
+        System.out.println(asJsonString(moveRequestDTO));
+        System.out.println(isBoardFullZeros);
 
         assertTrue(isBoardFullZeros);
     }
 
     @Test
     public void isValidMoveRequestPlayerTwo() throws Exception {
-        final Method method = MancalaService.class.getDeclaredMethod("boardPlayerIsFullZeros", PlayerMoveRequestDTO.class);
+        final Method method = MancalaService.class.getDeclaredMethod("isValidMoveRequest", MoveRequestDTO.class);
         method.setAccessible(true);
 
         final MoveRequestDTO moveRequestDTO = getInstance().moveRequestDTO;
+        moveRequestDTO.getPlayers().get(PLAYER_ONE.playerTypeValue).setPlayerTurn(false);
         moveRequestDTO.getPlayers().get(PLAYER_TWO.playerTypeValue).setPlayerTurn(true);
-        moveRequestDTO.setPit(START_BOARD_PLAYER_TWO);
+        moveRequestDTO.setPit(LIMIT_BOARD_PLAYER_TWO - 1);
 
-        final boolean isBoardFullZeros = (boolean) method.invoke(service, moveRequestDTO.getPlayers().get(PLAYER_TWO.playerTypeValue));
+        final boolean isBoardFullZeros = (boolean) method.invoke(service, moveRequestDTO);
+        System.out.println(asJsonString(moveRequestDTO));
+        System.out.println(isBoardFullZeros);
+
 
         assertTrue(isBoardFullZeros);
+    }
+
+    @Test
+    public void isInvalidMoveRequestPlayerOne() {
+        final MoveRequestDTO moveRequestDTO = getInstance().moveRequestDTO;
+        moveRequestDTO.getPlayers().get(PLAYER_ONE.playerTypeValue).setPlayerTurn(true);
+        moveRequestDTO.setPit(START_BOARD_PLAYER_TWO);
+
+        assertThrows(IllegalArgumentException.class, () -> service.makeMove(moveRequestDTO));
+    }
+
+    @Test
+    public void isInvalidMoveRequestPlayerTwo() {
+        final MoveRequestDTO moveRequestDTO = getInstance().moveRequestDTO;
+        moveRequestDTO.getPlayers().get(PLAYER_TWO.playerTypeValue).setPlayerTurn(true);
+        moveRequestDTO.getPlayers().get(PLAYER_ONE.playerTypeValue).setPlayerTurn(false);
+        moveRequestDTO.setPit(START_BOARD_PLAYER_ONE);
+
+        assertThrows(IllegalArgumentException.class, () -> service.makeMove(moveRequestDTO));
     }
 
 }

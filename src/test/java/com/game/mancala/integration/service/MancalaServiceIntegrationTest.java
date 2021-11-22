@@ -13,6 +13,7 @@ import com.game.mancala.service.MancalaService;
 import com.game.mancala.utils.MancalaMockData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -188,6 +189,46 @@ class MancalaServiceIntegrationTest {
 
         assertEquals(PLAYER_ONE, playerOne.getPlayerType());
         assertEquals(PLAYER_TWO, playerTwo.getPlayerType());
+    }
+
+    @Test
+    void invalidMovePlayerOne() {
+        pitSelected = START_BOARD_PLAYER_TWO;
+        requestBoarPlayerOne = new int[]{3, 2, 1, 5, 7, 6};
+        requestBoarPlayerTwo = new int[]{6, 6, 6, 6, 1, 6};
+        responseBoardPlayerOne = new int[]{3, 0, 2, 6, 7, 6};
+        responseBoardPlayerTwo = new int[]{6, 6, 6, 6, 1, 6};
+        bigPitPlayerOne = 2;
+        finalbigPitPlayerOne = 2;
+        bigPitPlayerTwo = 5;
+        finalbigPitPlayerTwo = 5;
+
+        final List<PlayerMoveRequestDTO> players = Arrays.asList(
+                PlayerMoveRequestDTO.builder()
+                        .playerType(PLAYER_ONE)
+                        .name(PLAYER_ONE_NAME)
+                        .isPlayerTurn(true)
+                        .board(
+                                BoardResponseDTO.builder()
+                                        .bigPit(bigPitPlayerOne).
+                                        pits(requestBoarPlayerOne).build()
+                        ).build(),
+                PlayerMoveRequestDTO.builder()
+                        .playerType(PLAYER_TWO)
+                        .name(PLAYER_TWO_NAME)
+                        .isPlayerTurn(false)
+                        .board(
+                                BoardResponseDTO.builder()
+                                        .bigPit(bigPitPlayerTwo).
+                                        pits(requestBoarPlayerTwo).build()
+                        ).build()
+        );
+
+        final MoveRequestDTO moveRequestDTO = mancalaMockData.moveRequestDTO;
+        moveRequestDTO.setPit(pitSelected);
+        moveRequestDTO.setPlayers(players);
+
+        assertThrows(IllegalArgumentException.class , () -> mancalaService.makeMove(moveRequestDTO));
     }
 
     @Test
