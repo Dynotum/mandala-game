@@ -76,7 +76,8 @@ public class MancalaService {
         boolean isCurrentPlayerTurn = false;
 
         if (stones == 0) {
-            throw new IllegalArgumentException("There is an empty pit");
+            log.debug("That is an empty pit! Player: " + getCurrentPlayerTurn(moveRequestDTO).getName());
+            throw new IllegalArgumentException("That is an empty pit! Player: " + getCurrentPlayerTurn(moveRequestDTO).getName());
         }
         System.out.println("######################");
         System.out.print("bp" + (1 + currentPlayerTurn.getPlayerType().playerTypeValue) + ": " + bigPitCurrentPlayer + " ");
