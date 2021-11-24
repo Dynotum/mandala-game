@@ -228,7 +228,7 @@ class MancalaServiceIntegrationTest {
         moveRequestDTO.setPit(pitSelected);
         moveRequestDTO.setPlayers(players);
 
-        assertThrows(IllegalArgumentException.class , () -> mancalaService.makeMove(moveRequestDTO));
+        assertThrows(IllegalArgumentException.class, () -> mancalaService.makeMove(moveRequestDTO));
     }
 
     @Test
@@ -615,5 +615,136 @@ class MancalaServiceIntegrationTest {
 
         assertEquals(PLAYER_ONE, playerOne.getPlayerType());
         assertEquals(PLAYER_TWO, playerTwo.getPlayerType());
+    }
+
+    @Test
+    void bugFound() {
+        pitSelected = 2;
+        requestBoarPlayerOne = new int[]{7, 7, 6, 6, 6, 6};
+        responseBoardPlayerOne = new int[]{7, 7, 0, 7, 7, 7};
+
+        requestBoarPlayerTwo = new int[]{0, 0, 8, 8, 8, 8,};
+        responseBoardPlayerTwo = new int[]{1, 1, 8, 8, 8, 8};
+        bigPitPlayerOne = 0;
+        finalbigPitPlayerOne = 1;
+        bigPitPlayerTwo = 2;
+        finalbigPitPlayerTwo = 2;
+
+        //       {7, 7, 0, 7, 7, 7, 1, 1, 8, 8, 8, 8
+        final List<PlayerMoveRequestDTO> players = Arrays.asList(
+                PlayerMoveRequestDTO.builder()
+                        .playerType(PLAYER_ONE)
+                        .name(PLAYER_ONE_NAME)
+                        .isPlayerTurn(true)
+                        .board(
+                                BoardResponseDTO.builder()
+                                        .bigPit(bigPitPlayerOne).
+                                        pits(requestBoarPlayerOne).build()
+                        ).build(),
+                PlayerMoveRequestDTO.builder()
+                        .playerType(PLAYER_TWO)
+                        .name(PLAYER_TWO_NAME)
+                        .isPlayerTurn(false)
+                        .board(
+                                BoardResponseDTO.builder()
+                                        .bigPit(bigPitPlayerTwo).
+                                        pits(requestBoarPlayerTwo).build()
+                        ).build()
+        );
+
+        final MoveRequestDTO moveRequestDTO = mancalaMockData.moveRequestDTO;
+        moveRequestDTO.setPit(pitSelected);
+        moveRequestDTO.setPlayers(players);
+
+        final MancalaResponseDTO mancalaResponseDTO = mancalaService.makeMove(moveRequestDTO);
+
+        final PlayerResponseDTO playerOne = mancalaResponseDTO.getPlayers().get(PLAYER_ONE.playerTypeValue);
+        final PlayerResponseDTO playerTwo = mancalaResponseDTO.getPlayers().get(PLAYER_TWO.playerTypeValue);
+
+        assertArrayEquals(responseBoardPlayerOne, playerOne.getBoard().getPits());
+        assertArrayEquals(responseBoardPlayerTwo, playerTwo.getBoard().getPits());
+
+        assertEquals(finalbigPitPlayerOne, playerOne.getBoard().getBigPit());
+        assertEquals(finalbigPitPlayerTwo, playerTwo.getBoard().getBigPit());
+
+        assertFalse(mancalaResponseDTO.isGameEnded());
+
+        assertFalse(playerOne.isPlayerTurn());
+        assertTrue(playerTwo.isPlayerTurn());
+
+        assertEquals(PLAYER_ONE, playerOne.getPlayerType());
+        assertEquals(PLAYER_TWO, playerTwo.getPlayerType());
+    }
+
+    @Test
+    void collectStonesThenEndGame() {
+        pitSelected = 3;
+        requestBoarPlayerOne = new int[]{0, 0, 0, 1, 0, 0};
+        responseBoardPlayerOne = new int[]{0, 0, 0, 0, 0, 0};
+
+        requestBoarPlayerTwo = new int[]{0, 6, 1, 0, 7, 0};
+        responseBoardPlayerTwo = new int[]{0, 0, 1, 0, 7, 0}; // [0, 7, 0, 1, 0, 0] reverted
+        bigPitPlayerOne = 23;
+        finalbigPitPlayerOne = 30; // 23 + (1 p1) + (6 p2) = 30 -> then end game = 30
+        bigPitPlayerTwo = 34;
+        finalbigPitPlayerTwo = 42; // 34  -> then end game + (7+1) = 42
+        /*
+        p2 34    0, 7, 0, 1, 6, 0
+                 0, 0, 0, 1, 0, 0   p1 23
+
+        p2  34   0, 7, 0, 1, 6, 0
+                 0, 0, 0, 0, 1, 0   p1 23
+
+        p2 34    0, 7, 0, 1, 0, 0
+                 0, 0, 0, 0, 0, 0   p1 30
+
+        p2 42    0, 7, 0, 1, 0, 0
+                 0, 0, 0, 0, 0, 0   p1 30
+
+              */
+
+        final List<PlayerMoveRequestDTO> players = Arrays.asList(
+                PlayerMoveRequestDTO.builder()
+                        .playerType(PLAYER_ONE)
+                        .name(PLAYER_ONE_NAME)
+                        .isPlayerTurn(true)
+                        .board(
+                                BoardResponseDTO.builder()
+                                        .bigPit(bigPitPlayerOne).
+                                        pits(requestBoarPlayerOne).build()
+                        ).build(),
+                PlayerMoveRequestDTO.builder()
+                        .playerType(PLAYER_TWO)
+                        .name(PLAYER_TWO_NAME)
+                        .isPlayerTurn(false)
+                        .board(
+                                BoardResponseDTO.builder()
+                                        .bigPit(bigPitPlayerTwo).
+                                        pits(requestBoarPlayerTwo).build()
+                        ).build()
+        );
+
+        final MoveRequestDTO moveRequestDTO = mancalaMockData.moveRequestDTO;
+        moveRequestDTO.setPit(pitSelected);
+        moveRequestDTO.setPlayers(players);
+
+        final MancalaResponseDTO mancalaResponseDTO = mancalaService.makeMove(moveRequestDTO);
+
+        final PlayerResponseDTO playerOne = mancalaResponseDTO.getPlayers().get(PLAYER_ONE.playerTypeValue);
+        final PlayerResponseDTO playerTwo = mancalaResponseDTO.getPlayers().get(PLAYER_TWO.playerTypeValue);
+
+        assertEquals(PLAYER_ONE, playerOne.getPlayerType());
+        assertEquals(PLAYER_TWO, playerTwo.getPlayerType());
+
+        assertArrayEquals(responseBoardPlayerOne, playerOne.getBoard().getPits());
+        assertArrayEquals(responseBoardPlayerTwo, playerTwo.getBoard().getPits());
+
+        assertEquals(finalbigPitPlayerOne, playerOne.getBoard().getBigPit());
+        assertEquals(finalbigPitPlayerTwo, playerTwo.getBoard().getBigPit());
+
+        assertTrue(mancalaResponseDTO.isGameEnded());
+
+        assertFalse(playerOne.isPlayerTurn());
+        assertFalse(playerTwo.isPlayerTurn());
     }
 }

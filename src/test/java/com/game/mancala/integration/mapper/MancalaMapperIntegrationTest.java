@@ -29,7 +29,6 @@ class MancalaMapperIntegrationTest {
     @Autowired
     MancalaMapper mancalaMapper;
 
-
     private final MancalaMockData mancalaMockData = MancalaMockData.getInstance();
 
     @Test

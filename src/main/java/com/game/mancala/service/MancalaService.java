@@ -35,6 +35,7 @@ public class MancalaService {
         }
 
         final int[] fullBoard = getFullBoard(moveRequestDTO);
+
         doMove(fullBoard, moveRequestDTO);
 
         final boolean isEndedGame = boardPlayerIsFullZeros(moveRequestDTO);
@@ -46,7 +47,6 @@ public class MancalaService {
     }
 
     public EndGameResponseDTO endGame(EndGameRequestDTO endGameRequestDTO) {
-
         final PlayerEndGameRequestDTO playerOne = endGameRequestDTO.getPlayers().get(PLAYER_ONE.playerTypeValue);
         final PlayerEndGameRequestDTO playerTwo = endGameRequestDTO.getPlayers().get(PLAYER_TWO.playerTypeValue);
 
@@ -79,13 +79,7 @@ public class MancalaService {
             log.debug("That is an empty pit! Player: " + getCurrentPlayerTurn(moveRequestDTO).getName());
             throw new IllegalArgumentException("That is an empty pit! Player: " + getCurrentPlayerTurn(moveRequestDTO).getName());
         }
-        System.out.println("######################");
-        System.out.print("bp" + (1 + currentPlayerTurn.getPlayerType().playerTypeValue) + ": " + bigPitCurrentPlayer + " ");
-        System.out.print(Arrays.toString(board));
-        System.out.println();
-        System.out.println("######################");
-
-        // Take stones
+        // Collect stones
         board[pickedPit] = 0;
 
         while (stones > 0) {
@@ -96,11 +90,13 @@ public class MancalaService {
 
                 if (stones == 0) {
                     isCurrentPlayerTurn = true;
-                    System.out.println("PLAYER " + currentPlayerTurn.getPlayerType() + " HAS AN EXTRA TURN");
+                    log.info("Player " + currentPlayerTurn.getPlayerType() + " has an extra turn.");
                 }
 
                 if (stones > 0) {
-                    if (PLAYER_TWO.equals(currentPlayerTurn.getPlayerType())) pickedPit = 0;
+                    if (PLAYER_TWO.equals(currentPlayerTurn.getPlayerType())) {
+                        pickedPit = 0;
+                    }
                     board[pickedPit]++;
                     stones--;
                 }
@@ -115,16 +111,24 @@ public class MancalaService {
             stones--;
         }
 
-        System.out.print("bp" + (1 + currentPlayerTurn.getPlayerType().playerTypeValue) + ": " + bigPitCurrentPlayer + " ");
-        System.out.print(Arrays.toString(board));
-        System.out.println();
-
-        if (pickedPit < LIMIT_BOARD_PLAYER_TWO && board[pickedPit] == 1) {
+        if (pickedPit < LIMIT_BOARD_PLAYER_TWO && board[pickedPit] == 1 && isCurrentPitInPlayerBoard(pickedPit, currentPlayerTurn)) { // Y pickedpit este dentro del rango del currentplayer
+            log.info("Collect stones: " + getStolenStones(board, pickedPit));
             bigPitCurrentPlayer += getStolenStones(board, pickedPit);
             getFullBoardAfterStolen(board, pickedPit);
         }
 
         updateMove(moveRequestDTO, board, bigPitCurrentPlayer, isCurrentPlayerTurn);
+    }
+
+    private boolean isCurrentPitInPlayerBoard(int currentPit, PlayerMoveRequestDTO currentPlayer) {
+        if (PLAYER_ONE.equals(currentPlayer.getPlayerType())) {
+            return currentPit >= START_BOARD_PLAYER_ONE && currentPit <= LIMIT_BOARD_PLAYER_ONE - 1;
+        }
+
+        if (PLAYER_TWO.equals(currentPlayer.getPlayerType())) {
+            return currentPit >= LIMIT_BOARD_PLAYER_ONE && currentPit <= LIMIT_BOARD_PLAYER_TWO - 1;
+        }
+        return false;
     }
 
     private void updateMove(MoveRequestDTO moveRequestDTO, int[] board, int bigPitCurrentPlayer, boolean isCurrentPlayerTurn) {
@@ -180,7 +184,12 @@ public class MancalaService {
             currentPlayer.getBoard().setBigPit(newBigPit);
         }
 
-        moveRequestDTO.setPlayers(List.of(currentPlayer, oppositePlayer));
+        if (PLAYER_ONE.equals(currentPlayer.getPlayerType())) {
+            moveRequestDTO.setPlayers(List.of(currentPlayer, oppositePlayer));
+        } else {
+            moveRequestDTO.setPlayers(List.of(oppositePlayer, currentPlayer));
+        }
+
         moveRequestDTO.getPlayers().forEach(turn -> turn.setPlayerTurn(false));
     }
 

@@ -8,6 +8,7 @@ import com.game.mancala.domain.dto.responses.MancalaResponseDTO;
 import com.game.mancala.service.MancalaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +18,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import lombok.extern.slf4j.Slf4j;
 
+@CrossOrigin
 @Slf4j
 @RestController
 @RequestMapping("/mancala")
@@ -31,7 +33,7 @@ public class MancalaController {
 
     @PostMapping(path = "/start", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<MancalaResponseDTO> startGame(@RequestBody StartRequestDTO startRequestDTO) {
-        log.info("Hello mancala");
+        log.info("Starting a new board");
         return ResponseEntity.ok(mancalaService.startGame(startRequestDTO));
     }
 
@@ -43,7 +45,7 @@ public class MancalaController {
 
     @PostMapping(path = "/end", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<EndGameResponseDTO> endGame(@RequestBody EndGameRequestDTO endGameRequestDTO) {
-        log.info("End of game!");
+        log.info("End of game");
         return ResponseEntity.ok(mancalaService.endGame(endGameRequestDTO));
     }
 }

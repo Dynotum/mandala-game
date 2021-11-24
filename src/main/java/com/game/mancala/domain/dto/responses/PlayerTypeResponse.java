@@ -23,10 +23,6 @@ public enum PlayerTypeResponse {
         return playerType.equals(PLAYER_ONE) ? PLAYER_TWO : PLAYER_ONE;
     }
 
-    public static int getStartBoardPlayerType(PlayerTypeResponse playerType) {
-        return PLAYER_ONE.equals(playerType) ? START_BOARD_PLAYER_ONE : START_BOARD_PLAYER_TWO;
-    }
-
     public static int getLimitBoardPlayerType(PlayerTypeResponse playerType) {
         return PLAYER_ONE.equals(playerType) ? LIMIT_BOARD_PLAYER_ONE : LIMIT_BOARD_PLAYER_TWO;
     }

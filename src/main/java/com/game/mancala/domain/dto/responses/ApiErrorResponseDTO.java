@@ -19,8 +19,6 @@ import java.time.Instant;
 public class ApiErrorResponseDTO {
 
     private Instant timestamp;
-
     private HttpStatus status;
-
     private String error;
 }

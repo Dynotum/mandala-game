@@ -1,5 +1,7 @@
 package com.game.mancala.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.Random;
 
 public class Constants {
@@ -17,4 +19,13 @@ public class Constants {
 
     public static final int START_BOARD_PLAYER_TWO = 7;
     public static final int LIMIT_BOARD_PLAYER_TWO = 12;
+
+    public static String asJsonString(final Object obj) {
+        try {
+            final ObjectMapper mapper = new ObjectMapper();
+            return mapper.writeValueAsString(obj);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
