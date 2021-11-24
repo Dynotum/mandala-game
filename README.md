@@ -95,7 +95,7 @@ some set of the opponent's pieces.- [Wikipedia](https://en.wikipedia.org/wiki/Ma
       sure ```Enable annotation processing``` is checked. For more information
       see [IntelliJ oficial wiki](https://www.jetbrains.com/help/idea/annotation-processors-support.html)
 
-* Install [Postman](https://www.postman.com/)
+* Install [Postman](https://www.postman.com/) (Optional)
 * Install [Gradle](https://gradle.org/install/)
      ```sh
     -----------------------------------------------------
@@ -111,9 +111,8 @@ some set of the opponent's pieces.- [Wikipedia](https://en.wikipedia.org/wiki/Ma
     JVM:          11.0.8 (AdoptOpenJDK 11.0.8+10)
    ```
 * Install [OpenJDK 11](https://openjdk.java.net/projects/jdk/11/)
-*
-Install [nvm](https://github.com/nvm-sh/nvm?fbclid=IwAR2AaWmjSE--7nfr9qgNqGt9Hit-Qt6VwNW2r8SYkUcz9GqfbExwb9qNy9s#installing-and-updating)
-or [nvm-windows](https://github.com/coreybutler/nvm-windows)
+* 
+* Install [nvm](https://github.com/nvm-sh/nvm?fbclid=IwAR2AaWmjSE--7nfr9qgNqGt9Hit-Qt6VwNW2r8SYkUcz9GqfbExwb9qNy9s#installing-and-updating) or [nvm-windows](https://github.com/coreybutler/nvm-windows)
 * Node v16.13.0
 * npm v8.1.0
 * Install [yarn](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)  1.22.17
