@@ -618,7 +618,7 @@ class MancalaServiceIntegrationTest {
     }
 
     @Test
-    void bugFound() {
+    void regularMove() {
         pitSelected = 2;
         requestBoarPlayerOne = new int[]{7, 7, 6, 6, 6, 6};
         responseBoardPlayerOne = new int[]{7, 7, 0, 7, 7, 7};
