@@ -165,9 +165,13 @@ some set of the opponent's pieces.- [Wikipedia](https://en.wikipedia.org/wiki/Ma
     $ npm install -g yarn   
    ```
 
-> It will be running at http://localhost:3000
+3.  In the fronted project directory (called frontend folder), you need to install all the dependencies listed within package.json in the local node_modules folder.
+   ```sh
+    $ yarn install   
+   ```
 
-3. In the fronted project directory (called frontend folder), you can run:
+
+4. In the fronted project directory (called frontend folder), you can start the application:
    ```sh
     $ yarn start   
    ```
