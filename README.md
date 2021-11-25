@@ -22,6 +22,7 @@
       </ul>
     </li>
     <li><a href="#generate-a-jar">Generate a JAR</a></li>
+    <li><a href="#docke-deployr">Docker Deploy</a></li>
     <li><a href="#backend">Backend</a>
       <ul>
         <li><a href="#test">Test</a></li>
@@ -117,7 +118,24 @@ some set of the opponent's pieces.- [Wikipedia](https://en.wikipedia.org/wiki/Ma
 * npm v8.1.0
 * Install [yarn](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)  1.22.17
 
-> IMPORTANT : If you do not want to install nvm, NodeJS nor yarn, you can use Gradle to generate a JAR file with all the dependencies. Follow the instructions below.
+> IMPORTANT : If you do not want to install nvm, NodeJS nor yarn, you can use Gradle to generate a JAR file with all the dependencies. Follow the steps below 
+
+> If you have installed Docker on your machine, go to the Docker Deploy section. And follow the steps.
+
+> If you do not have Docker and you want to generate and run a JAR file go under Generate a JAR section.
+
+## Docker Deploy
+
+1. Build the dockerfile with the command below
+   ```sh
+    $ docker build . --progress=plain --no-cache -t mancala-image
+   ```
+
+2. Create a base image for the Mancala game
+   ```sh
+    $ docker run --name mancala -h mancala -p 8080:8080 -d mancala-image
+   ```
+3. Finally, open http://localhost:8080 to view it in the browser.
 
 ## Generate a JAR
 
