@@ -115,6 +115,7 @@ some set of the opponent's pieces.- [Wikipedia](https://en.wikipedia.org/wiki/Ma
 * Node v16.13.0
 * npm v8.1.0
 * Install [yarn](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)  1.22.17
+> If you do not want to install nvm, NodeJS nor yarn, you can use Gradle to install these dependencies locally in the root of the project as shown [here](#frontend)  
 
 ## Backend
 
@@ -139,7 +140,7 @@ some set of the opponent's pieces.- [Wikipedia](https://en.wikipedia.org/wiki/Ma
    $ java -jar malanca-0.0.1-SNAPSHOT.jar
    ```
 
-## Tests
+## Test
 
 1. Execute bundle of unit and integration tests
    ```sh
@@ -149,6 +150,8 @@ some set of the opponent's pieces.- [Wikipedia](https://en.wikipedia.org/wiki/Ma
 ## Frontend
 
 **Run Frontend**
+
+* If you do not want to install Node.js, nvm, neither Yarn or you do have a different versions. You can follow these steps in order to download and install these dependencies locally under the project. 
 
 1. First, check our version of Node after installing it with nvm If the installation was successful, you should be able
    to run the following command.

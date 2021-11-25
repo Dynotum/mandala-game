@@ -8,6 +8,8 @@ plugins {
     id 'com.github.node-gradle.node' version '3.1.1'
 }
 
+apply plugin: 'io.spring.dependency-management'
+
 group = 'com.game'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
@@ -58,6 +60,43 @@ node {
     // (in the .npmrc file for instance)
     nodeProxySettings = ProxySettings.SMART
 }
+
+
+task yarnBuild(type: YarnTask) {
+    execOverrides {
+        it.workingDir = 'src/main/frontend'
+    }
+    args = ['build']
+}
+
+task executeYarn(type: GradleBuild) {
+    tasks = ['yarnInstallDependencies', 'yarnBuild', 'copyFrontendToBuild']
+}
+
+
+task copyFrontendToBuild(type: Copy) {
+    from "$projectDir/src/main/frontend/build/"
+    into "$buildDir/resources/main/static"
+}
+
+task npmInstallDependencies(type: NpmTask) {
+    dependsOn 'nodeSetup'
+    dependsOn 'npmSetup'
+    execOverrides {
+        it.ignoreExitValue = true
+        it.workingDir = 'src/main/frontend'
+    }
+    args = ['install']
+}
+
+task yarnInstallDependencies(type: YarnTask) {
+    execOverrides {
+//        it.ignoreExitValue = true
+        it.workingDir = 'src/main/frontend'
+    }
+    args = ['install']
+}
+
 
 repositories {
     mavenCentral()
