@@ -21,6 +21,7 @@
         <li><a href="#prerequisites">Prerequisites</a></li>
       </ul>
     </li>
+    <li><a href="#generate-a-jar">Generate a JAR</a></li>
     <li><a href="#backend">Backend</a>
       <ul>
         <li><a href="#test">Test</a></li>
@@ -28,7 +29,7 @@
     </li>
     <li><a href="#frontend">Frontend</a></li>
     <li><a href="#usage">Usage</a></li>
-    <li><a href="#tests">Tests</a></li>
+    <li><a href="#test">Tests</a></li>
     <li>
       <a href="#technical-information">Technical Information</a>
       <ul>
@@ -111,11 +112,39 @@ some set of the opponent's pieces.- [Wikipedia](https://en.wikipedia.org/wiki/Ma
     JVM:          11.0.8 (AdoptOpenJDK 11.0.8+10)
    ```
 * Install [OpenJDK 11](https://openjdk.java.net/projects/jdk/11/)
-* Install [nvm](https://github.com/nvm-sh/nvm?fbclid=IwAR2AaWmjSE--7nfr9qgNqGt9Hit-Qt6VwNW2r8SYkUcz9GqfbExwb9qNy9s#installing-and-updating) or [nvm-windows](https://github.com/coreybutler/nvm-windows)
+*
+Install [nvm](https://github.com/nvm-sh/nvm?fbclid=IwAR2AaWmjSE--7nfr9qgNqGt9Hit-Qt6VwNW2r8SYkUcz9GqfbExwb9qNy9s#installing-and-updating)
+or [nvm-windows](https://github.com/coreybutler/nvm-windows)
 * Node v16.13.0
 * npm v8.1.0
 * Install [yarn](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)  1.22.17
-> If you do not want to install nvm, NodeJS nor yarn, you can use Gradle to install these dependencies locally in the root of the project as shown [here](#frontend)  
+
+> IMPORTANT : If you do not want to install nvm, NodeJS nor yarn, you can use Gradle to generate a JAR file with all the dependencies. Follow the instructions below.
+
+## Generate a JAR
+
+* If you do not want to install Node.js, nvm, neither Yarn nor you do have a different versions. You can follow these
+  steps in order to generate a JAR and execute it.
+
+> If you don't want to generate and run a JAR file and prefer to run it manually, go to the Backend section followed by the Frontend.
+
+1. Clean with Gradle
+   ```sh
+   $ ./gradlew clean
+   ```
+2. Execute a task with Gradle in order to download all the dependencies under the project.
+   ```sh
+   $ ./gradlew executeYarn
+   ```
+3. Let's generate a JAR file.
+   ```sh
+   $ ./gradlew bootJar
+   ```
+4. We're ready to go, run the JAR file that has been created in order to start the app.
+   ```sh
+   $  java -jar build/libs/malanca-0.0.1-SNAPSHOT.jar
+   ```
+5. Open http://localhost:8080 to view it in the browser.
 
 ## Backend
 
@@ -123,7 +152,7 @@ some set of the opponent's pieces.- [Wikipedia](https://en.wikipedia.org/wiki/Ma
 
 1. Clean and build with Gradle
    ```sh
-   $ ./gradlew build --refresh-dependencies
+   $ ./gradlew clean build
    ```
 2. Run the backend project app on local with Gradle
    ```sh
@@ -131,7 +160,7 @@ some set of the opponent's pieces.- [Wikipedia](https://en.wikipedia.org/wiki/Ma
    ```
    > It will be running at http://localhost:8080
 
-3. (Optional) Generate and run jar file
+3. (Optional) Generate and run jar file only for backend purposes
    ```sh
    $ ./gradlew bootJar
    ```
@@ -151,8 +180,6 @@ some set of the opponent's pieces.- [Wikipedia](https://en.wikipedia.org/wiki/Ma
 
 **Run Frontend**
 
-* If you do not want to install Node.js, nvm, neither Yarn or you do have a different versions. You can follow these steps in order to download and install these dependencies locally under the project. 
-
 1. First, check our version of Node after installing it with nvm If the installation was successful, you should be able
    to run the following command.
    ```sh
@@ -168,7 +195,8 @@ some set of the opponent's pieces.- [Wikipedia](https://en.wikipedia.org/wiki/Ma
     $ npm install -g yarn   
    ```
 
-3.  In the fronted project directory (called frontend folder), you need to install all the dependencies listed within package.json in the local node_modules folder.
+3. In the fronted project directory (called frontend folder), you need to install all the dependencies listed within
+   package.json in the local node_modules folder.
    ```sh
     $ yarn install   
    ```
@@ -193,7 +221,7 @@ some set of the opponent's pieces.- [Wikipedia](https://en.wikipedia.org/wiki/Ma
 
 ### Code architecture Backend
 
-**java/com/game/malanca**
+**src/main/java/com/game/mancala**
 
 - **config/apidocumentation** - Contains Swagger configuration class for API documentation
 - **controller** - Contains all controllers (Our API endpoints). This controllers uses @Service classes located at
@@ -210,9 +238,15 @@ some set of the opponent's pieces.- [Wikipedia](https://en.wikipedia.org/wiki/Ma
 
 - **application.properties** - Contains all properties for Mancala game app
 
+**src/test/java/com/game/mancala**
+
+- **integration** Contains all the integration tests for the project
+- **unit** Contains all the unit tests for the project
+- **utils** Contains a helper class for mocking a object
+
 ### Code architecture Frontend
 
-**$project/frontend**
+**src/main/frontend**
 
 - **public** - Public folder that can be referenced from the index.html where is the page template.
 - **src** - Contains all the files related to run the app.
