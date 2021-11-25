@@ -1,0 +1,113 @@
+{
+    "players": [
+        {
+            "name": "",
+            "playerType": "PLAYER_ONE",
+            "board": {
+                "pits": [
+                    6,
+                    6,
+                    6,
+                    6,
+                    6,
+                    6
+                ],
+                "bigPit": 0
+            },
+            "playerTurn": false
+        },
+        {
+            "name": "",
+            "playerType": "PLAYER_TWO",
+            "board": {
+                "pits": [
+                    6,
+                    6,
+                    6,
+                    6,
+                    6,
+                    6
+                ],
+                "bigPit": 0
+            },
+            "playerTurn": true
+        }
+    ],
+    "gameEnded": false
+}
+
+{
+    "players": [
+        {
+            "name": "",
+            "playerType": "PLAYER_ONE",
+            "board": {
+                "pits": [
+                    6,
+                    6,
+                    6,
+                    6,
+                    6,
+                    6
+                ],
+                "bigPit": 0
+            },
+            "playerTurn": false
+        },
+        {
+            "name": "",
+            "playerType": "PLAYER_TWO",
+            "board": {
+                "pits": [
+                    0,
+                    7,
+                    7,
+                    7,
+                    7,
+                    7
+                ],
+                "bigPit": 1
+            },
+            "playerTurn": true
+        }
+    ],
+    "gameEnded": false
+}
+,
+{
+    "players": [
+        {
+            "name": "",
+            "playerType": "PLAYER_ONE",
+            "board": {
+                "pits": [
+                    7,
+                    0,
+                    7,
+                    7,
+                    0,
+                    7
+                ],
+                "bigPit": 9
+            },
+            "playerTurn": false
+        },
+        {
+            "name": "",
+            "playerType": "PLAYER_TWO",
+            "board": {
+                "pits": [
+                    1,
+                    0,
+                    8,
+                    8,
+                    8,
+                    8
+                ],
+                "bigPit": 2
+            },
+            "playerTurn": true
+        }
+    ],
+    "gameEnded": false
+}
